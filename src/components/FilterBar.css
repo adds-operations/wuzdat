@@ -1,0 +1,51 @@
+.filter-bar {
+    position: sticky;
+    top: 73px;
+    /* Navbar height approx + padding */
+    z-index: 40;
+    background-color: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(8px);
+    padding: 0.75rem 0;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.filter-bar.scrolled {
+    border-color: var(--border);
+}
+
+.filter-scroll {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    /* Space for scrollbar if visible */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.filter-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-chip {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-primary);
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.filter-chip:hover {
+    background-color: #333;
+    color: var(--text-primary);
+}
+
+.filter-chip.active {
+    background-color: var(--text-primary);
+    color: var(--bg-surface);
+}

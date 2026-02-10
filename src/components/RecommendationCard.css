@@ -1,0 +1,209 @@
+.card {
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s;
+    break-inside: avoid;
+    /* Essential for masonry */
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+    position: relative;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-image-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: auto;
+    /* Let image dictate or enforce ratio */
+    background-color: #eee;
+}
+
+.card-image {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.card-placeholder {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(45deg, #333333, #444444);
+}
+
+.card-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.card:hover .card-overlay {
+    opacity: 1;
+}
+
+.visit-btn,
+.action-btn {
+    background: var(--accent);
+    color: black;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, background-color 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.visit-btn:hover,
+.action-btn:hover {
+    transform: scale(1.1);
+}
+
+.action-btn.delete {
+    color: #ef4444;
+}
+
+.action-btn.delete:hover {
+    background-color: #fee2e2;
+}
+
+.owner-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+/* Override center behavior for visit btn if actions exist? No, keep it simple */
+
+.card-content {
+    padding: 1rem;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.card-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text-primary);
+}
+
+.card-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    line-height: 1.5;
+}
+
+.card-author {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Space beween info and tick button */
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.author-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.author-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.author-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.action-btn.connect {
+    background-color: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+}
+
+.action-btn.connect:hover {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+}
+
+.action-btn.tick {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.action-btn.tick:hover {
+    background: rgba(255, 77, 77, 0.2);
+    border-color: rgba(255, 77, 77, 0.2);
+    color: #ffadb0;
+    /* Light reddish tint */
+    transform: scale(1.1);
+}
+
+.action-btn.tick.completed {
+    background: #ffcc00;
+    color: black;
+    border-color: #ffcc00;
+}
+
+.action-btn.like {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.action-btn.like:hover {
+    background: rgba(255, 77, 77, 0.2);
+    color: #ff4d4d;
+    transform: scale(1.1);
+}
+
+.action-btn.like.liked {
+    color: #ff4d4d;
+    background: rgba(255, 77, 77, 0.1);
+}
