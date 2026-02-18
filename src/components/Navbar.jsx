@@ -1,9 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { User, Heart, Maximize2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const Navbar = ({ isFocusMode, onToggleFocus }) => {
+    const { user } = useAuth();
+
     return (
         <nav className="navbar">
             <div className="container navbar-content">
@@ -44,7 +47,20 @@ const Navbar = ({ isFocusMode, onToggleFocus }) => {
                     </NavLink>
 
                     <NavLink to="/profile" className="icon-btn" aria-label="Profile">
-                        <User size={24} />
+                        {user?.photoURL ? (
+                            <img
+                                src={user.photoURL}
+                                alt={user.displayName || 'Profile'}
+                                style={{
+                                    width: 28,
+                                    height: 28,
+                                    borderRadius: '50%',
+                                    objectFit: 'cover',
+                                }}
+                            />
+                        ) : (
+                            <User size={24} />
+                        )}
                     </NavLink>
                 </div>
             </div>
