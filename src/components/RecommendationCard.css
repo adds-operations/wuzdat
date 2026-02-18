@@ -207,3 +207,27 @@
     color: #ff4d4d;
     background: rgba(255, 77, 77, 0.1);
 }
+
+.author-avatar-fallback {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.625rem;
+    color: var(--text-primary);
+}
+
+.action-btn.connect.sent {
+    color: #10b981;
+    border-color: #10b981;
+}
+
+.friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}

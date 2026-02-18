@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { auth, googleProvider } from '../firebaseClient';
+import { ensureUserProfile } from '../services/friendsService';
 
 const AuthContext = createContext(null);
 
@@ -18,13 +19,16 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         if (!auth) {
-            // Firebase not configured — skip auth, stay in "no user" state
             setLoading(false);
             return;
         }
 
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             setUser(firebaseUser);
+            if (firebaseUser) {
+                // Auto-create user profile in Firestore on first login
+                await ensureUserProfile(firebaseUser);
+            }
             setLoading(false);
         });
 

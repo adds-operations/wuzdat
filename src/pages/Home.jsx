@@ -2,11 +2,13 @@ import React, { useState, useMemo } from 'react';
 import FilterBar from '../components/FilterBar';
 import RecommendationCard from '../components/RecommendationCard';
 import { Plus, UserPlus } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import AddModal from '../components/AddModal';
 import AddFriendModal from '../components/AddFriendModal';
 import './Home.css';
 
-const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], onToggleLike, completedRecIds = [], onToggleCompleted, isFocusMode = false }) => {
+const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], onToggleLike, completedRecIds = [], onToggleCompleted, isFocusMode = false, friendIds = [], onFriendsChanged }) => {
+    const { user } = useAuth();
     const [activeFilter, setActiveFilter] = useState('All');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isFriendModalOpen, setIsFriendModalOpen] = useState(false);
@@ -17,7 +19,10 @@ const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], onToggleL
             if (feedType === 'public') {
                 typeMatch = item.type === 'public' && !completedRecIds.includes(item.id);
             } else if (feedType === 'friends') {
-                typeMatch = (item.type === 'friends' || item.type === 'public') && !completedRecIds.includes(item.id);
+                // Show posts from friends (both public and friends-only) + own posts
+                const isFriend = friendIds.includes(item.userId);
+                const isOwn = item.userId === user?.uid;
+                typeMatch = (isFriend || isOwn || item.type === 'public') && !completedRecIds.includes(item.id);
             } else if (feedType === 'liked') {
                 typeMatch = likedRecIds.includes(item.id);
             } else if (feedType === 'completed') {
@@ -28,7 +33,7 @@ const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], onToggleL
             if (activeFilter === 'All') return true;
             return item.category === activeFilter;
         });
-    }, [activeFilter, feedType, recs, likedRecIds, completedRecIds]);
+    }, [activeFilter, feedType, recs, likedRecIds, completedRecIds, friendIds, user]);
 
     return (
         <div className="home-page">
@@ -45,6 +50,9 @@ const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], onToggleL
                             isCompleted={completedRecIds.includes(item.id)}
                             onToggleCompleted={onToggleCompleted}
                             feedType={feedType}
+                            currentUserId={user?.uid}
+                            friendIds={friendIds}
+                            onFriendsChanged={onFriendsChanged}
                         />
                     ))}
                 </div>
@@ -68,6 +76,7 @@ const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], onToggleL
             <AddFriendModal
                 isOpen={isFriendModalOpen}
                 onClose={() => setIsFriendModalOpen(false)}
+                onFriendsChanged={onFriendsChanged}
             />
         </div>
     );

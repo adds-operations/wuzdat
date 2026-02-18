@@ -1,16 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, Trash2 } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getFriendsList } from '../services/friendsService';
 import RecommendationCard from '../components/RecommendationCard';
 import './Profile.css';
 
 const Profile = ({ recs = [], onDelete, onEdit, likedRecIds = [], onToggleLike, completedRecIds = [], onToggleCompleted }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [friends, setFriends] = useState([]);
+    const [loadingFriends, setLoadingFriends] = useState(true);
 
     // Filter to show only the current user's recommendations
     const myRecs = recs.filter(r => r.userId === user?.uid);
+
+    useEffect(() => {
+        const loadFriends = async () => {
+            if (user) {
+                try {
+                    const friendsList = await getFriendsList(user.uid);
+                    setFriends(friendsList);
+                } catch (err) {
+                    console.error('Error loading friends:', err);
+                }
+            }
+            setLoadingFriends(false);
+        };
+        loadFriends();
+    }, [user]);
 
     const handleLogout = async () => {
         try {
@@ -49,6 +67,10 @@ const Profile = ({ recs = [], onDelete, onEdit, likedRecIds = [], onToggleLike, 
                         <span className="stat-value">{myRecs.length}</span>
                         <span className="stat-label">Shared</span>
                     </div>
+                    <div className="stat">
+                        <span className="stat-value">{friends.length}</span>
+                        <span className="stat-label">Friends</span>
+                    </div>
                 </div>
             </header>
 
@@ -71,6 +93,28 @@ const Profile = ({ recs = [], onDelete, onEdit, likedRecIds = [], onToggleLike, 
                         ))
                     ) : (
                         <p className="empty-state">You haven't shared anything yet.</p>
+                    )}
+                </div>
+            </section>
+
+            <section className="profile-section">
+                <h2>Friends</h2>
+                <div className="friends-list">
+                    {loadingFriends ? (
+                        <p className="empty-state">Loading...</p>
+                    ) : friends.length > 0 ? (
+                        friends.map(friend => (
+                            <div key={friend.id} className="friend-item-real">
+                                {friend.photoURL ? (
+                                    <img src={friend.photoURL} alt={friend.displayName} className="friend-avatar-img" />
+                                ) : (
+                                    <div className="friend-avatar-fallback">{friend.displayName?.[0] || '?'}</div>
+                                )}
+                                <span className="friend-name">{friend.displayName}</span>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="empty-state">No friends yet. Use the + button to add friends!</p>
                     )}
                 </div>
             </section>

@@ -1,17 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ExternalLink, Play, Music, Film, Youtube, Globe, Trash2, Edit2, BookOpen, Book, Check, Heart, UserPlus } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { sendFriendRequest } from '../services/friendsService';
 import './RecommendationCard.css';
 
-const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggleLike, isCompleted, onToggleCompleted, feedType }) => {
+const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggleLike, isCompleted, onToggleCompleted, feedType, currentUserId, friendIds = [], onFriendsChanged }) => {
+    const { user } = useAuth();
+    const [connectStatus, setConnectStatus] = useState(null); // null | 'sending' | 'sent' | 'error'
+
     const getIcon = (cat) => {
         switch (cat.toLowerCase()) {
             case 'movies': return <Film size={14} />;
             case 'song': return <Music size={14} />;
-            case 'songs': return <Music size={14} />; // Keep for backward compatibility if needed
+            case 'songs': return <Music size={14} />;
             case 'youtube': return <Youtube size={14} />;
             case 'book': return <Book size={14} />;
             case 'read': return <BookOpen size={14} />;
             default: return <Globe size={14} />;
+        }
+    };
+
+    const isOwnPost = item.userId === user?.uid;
+    const isAlreadyFriend = item.author?.id && friendIds.includes(item.author.id);
+
+    const handleConnect = async (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (!user || !item.author?.id || isOwnPost || isAlreadyFriend) return;
+
+        setConnectStatus('sending');
+        try {
+            await sendFriendRequest(user, item.author.id);
+            setConnectStatus('sent');
+        } catch (err) {
+            if (err.message === 'Already friends' || err.message === 'Friend request already exists') {
+                setConnectStatus('sent');
+            } else {
+                setConnectStatus('error');
+                setTimeout(() => setConnectStatus(null), 2000);
+            }
         }
     };
 
@@ -45,7 +72,7 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
                         onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
-                            onToggleLike(item.id);
+                            onToggleLike && onToggleLike(item.id);
                         }}
                     >
                         <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
@@ -93,22 +120,23 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
                 {item.author && (
                     <div className="card-author">
                         <div className="author-info">
-                            <img src={item.author.avatar} alt={item.author.name} className="author-avatar" />
+                            {item.author.avatar ? (
+                                <img src={item.author.avatar} alt={item.author.name} className="author-avatar" />
+                            ) : (
+                                <div className="author-avatar-fallback">{item.author.name?.[0] || '?'}</div>
+                            )}
                             <span className="author-name">{item.author.name}</span>
                         </div>
 
-                        {/* Add Friend button only on Public page */}
-                        {feedType === 'public' && !isOwner && (
+                        {/* Add Friend button only on Public page, not for own posts or existing friends */}
+                        {feedType === 'public' && !isOwnPost && !isAlreadyFriend && (
                             <button
-                                className="action-btn connect"
-                                title="Connect"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    console.log('Connect with', item.author.name);
-                                }}
+                                className={`action-btn connect ${connectStatus === 'sent' ? 'sent' : ''}`}
+                                title={connectStatus === 'sent' ? 'Request Sent' : 'Connect'}
+                                onClick={handleConnect}
+                                disabled={connectStatus === 'sending' || connectStatus === 'sent'}
                             >
-                                <UserPlus size={16} />
+                                {connectStatus === 'sent' ? <Check size={16} /> : <UserPlus size={16} />}
                             </button>
                         )}
                     </div>

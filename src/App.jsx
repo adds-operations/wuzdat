@@ -6,6 +6,7 @@ import Profile from './pages/Profile';
 import Login from './pages/Login';
 
 import { db } from './firebaseClient';
+import { getFriendIds } from './services/friendsService';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import {
     collection,
@@ -32,6 +33,7 @@ function AppContent() {
     const [recs, setRecs] = useState([]);
     const [likedRecIds, setLikedRecIds] = useState([]);
     const [completedRecIds, setCompletedRecIds] = useState([]);
+    const [friendIds, setFriendIds] = useState([]);
     const [isFocusMode, setIsFocusMode] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -57,9 +59,13 @@ function AppContent() {
                 const completedSnap = await getDocs(collection(db, 'completed'));
                 const completedIds = completedSnap.docs.map(d => d.data().rec_id);
 
+                // Fetch friend IDs
+                const fIds = user ? await getFriendIds(user.uid) : [];
+
                 setRecs(recsData);
                 setLikedRecIds(likedIds);
                 setCompletedRecIds(completedIds);
+                setFriendIds(fIds);
             } catch (err) {
                 console.error('Error loading data:', err);
             } finally {
@@ -68,7 +74,14 @@ function AppContent() {
         };
 
         loadData();
-    }, []);
+    }, [user]);
+
+    const refreshFriends = useCallback(async () => {
+        if (user) {
+            const fIds = await getFriendIds(user.uid);
+            setFriendIds(fIds);
+        }
+    }, [user]);
 
     const handleAddRec = useCallback(async (newRec) => {
         const rec = {
@@ -233,6 +246,8 @@ function AppContent() {
                             completedRecIds={completedRecIds}
                             onToggleCompleted={toggleCompleted}
                             isFocusMode={isFocusMode}
+                            friendIds={friendIds}
+                            onFriendsChanged={refreshFriends}
                         />
                     </ProtectedRoute>
                 } />
@@ -247,6 +262,8 @@ function AppContent() {
                             completedRecIds={completedRecIds}
                             onToggleCompleted={toggleCompleted}
                             isFocusMode={isFocusMode}
+                            friendIds={friendIds}
+                            onFriendsChanged={refreshFriends}
                         />
                     </ProtectedRoute>
                 } />
@@ -261,6 +278,8 @@ function AppContent() {
                             completedRecIds={completedRecIds}
                             onToggleCompleted={toggleCompleted}
                             isFocusMode={isFocusMode}
+                            friendIds={friendIds}
+                            onFriendsChanged={refreshFriends}
                         />
                     </ProtectedRoute>
                 } />
@@ -275,6 +294,8 @@ function AppContent() {
                             completedRecIds={completedRecIds}
                             onToggleCompleted={toggleCompleted}
                             isFocusMode={isFocusMode}
+                            friendIds={friendIds}
+                            onFriendsChanged={refreshFriends}
                         />
                     </ProtectedRoute>
                 } />
