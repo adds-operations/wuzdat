@@ -18,6 +18,7 @@
     font-weight: 700;
     font-size: 1.25rem;
     letter-spacing: -0.025em;
+    color: var(--accent);
 }
 
 .nav-links {
