@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut } from 'lucide-react';
+import { User, LogOut, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getFriendsList } from '../services/friendsService';
+import { getFriendsList, removeFriend } from '../services/friendsService';
 import RecommendationCard from '../components/RecommendationCard';
 import './Profile.css';
 
@@ -105,6 +105,16 @@ const Profile = ({ recs = [], onDelete, onEdit, likedRecIds = [], onToggleLike, 
                     <div className="friends-grid">
                         {friends.map(friend => (
                             <div key={friend.id} className="friend-card">
+                                <button
+                                    className="friend-remove-btn"
+                                    title="Remove friend"
+                                    onClick={async () => {
+                                        await removeFriend(user.uid, friend.uid);
+                                        setFriends(prev => prev.filter(f => f.id !== friend.id));
+                                    }}
+                                >
+                                    <X size={14} />
+                                </button>
                                 {friend.photoURL ? (
                                     <img src={friend.photoURL} alt={friend.displayName} className="friend-card-avatar" />
                                 ) : (
