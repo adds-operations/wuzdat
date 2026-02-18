@@ -22,6 +22,7 @@ const AddFriendModal = ({ isOpen, onClose, onFriendsChanged }) => {
     const [sentRequests, setSentRequests] = useState([]);
     const [actionMsg, setActionMsg] = useState('');
     const [loadingRequests, setLoadingRequests] = useState(false);
+    const [notFoundEmail, setNotFoundEmail] = useState('');
 
     // Load pending and sent requests when modal opens
     useEffect(() => {
@@ -48,11 +49,28 @@ const AddFriendModal = ({ isOpen, onClose, onFriendsChanged }) => {
 
     if (!isOpen) return null;
 
+    const sendInviteEmail = (toEmail) => {
+        const subject = encodeURIComponent(`Join me on wuzdat!`);
+        const body = encodeURIComponent(
+            `Hey!\n\nI'd love to connect with you on wuzdat — a place to share and discover great recommendations for movies, songs, books, and more.\n\nJoin here: ${window.location.origin}\n\nSee you there! 🎬🎵📚`
+        );
+        window.open(`mailto:${toEmail}?subject=${subject}&body=${body}`, '_blank');
+    };
+
+    const sendRequestEmail = (toEmail) => {
+        const subject = encodeURIComponent(`${user.displayName || 'Someone'} sent you a friend request on wuzdat!`);
+        const body = encodeURIComponent(
+            `Hey!\n\n${user.displayName || 'A user'} wants to be your friend on wuzdat.\n\nLog in to accept: ${window.location.origin}\n\nSee you there! 🎬🎵📚`
+        );
+        window.open(`mailto:${toEmail}?subject=${subject}&body=${body}`, '_blank');
+    };
+
     const handleSearch = async (e) => {
         e.preventDefault();
         setSearchResult(null);
         setSearchError('');
         setActionMsg('');
+        setNotFoundEmail('');
 
         if (!searchEmail.trim()) return;
 
@@ -63,6 +81,7 @@ const AddFriendModal = ({ isOpen, onClose, onFriendsChanged }) => {
                 setSearchResult(found);
             } else {
                 setSearchError('No user found with that email.');
+                setNotFoundEmail(searchEmail.trim());
             }
         } catch (err) {
             setSearchError('Error searching. Try again.');
@@ -71,10 +90,11 @@ const AddFriendModal = ({ isOpen, onClose, onFriendsChanged }) => {
         }
     };
 
-    const handleSendRequest = async (toUid) => {
+    const handleSendRequest = async (toUid, toEmail) => {
         try {
             await sendFriendRequest(user, toUid);
             setActionMsg('Friend request sent!');
+            if (toEmail) sendRequestEmail(toEmail);
             setSearchResult(null);
             setSearchEmail('');
             await loadRequests();
@@ -148,14 +168,26 @@ const AddFriendModal = ({ isOpen, onClose, onFriendsChanged }) => {
                             </div>
                             <button
                                 className="send-request-btn"
-                                onClick={() => handleSendRequest(searchResult.uid)}
+                                onClick={() => handleSendRequest(searchResult.uid, searchResult.email)}
                             >
                                 <UserPlus size={16} /> Add
                             </button>
                         </div>
                     )}
 
-                    {searchError && <p className="search-error">{searchError}</p>}
+                    {searchError && (
+                        <div className="search-not-found">
+                            <p className="search-error">{searchError}</p>
+                            {notFoundEmail && (
+                                <button
+                                    className="invite-email-btn"
+                                    onClick={() => sendInviteEmail(notFoundEmail)}
+                                >
+                                    ✉️ Invite {notFoundEmail} via Email
+                                </button>
+                            )}
+                        </div>
+                    )}
                     {actionMsg && <p className="success-msg"><Check size={14} /> {actionMsg}</p>}
                 </div>
 

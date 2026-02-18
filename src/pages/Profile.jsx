@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, X } from 'lucide-react';
+import { User, LogOut, X, Check, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getFriendsList, removeFriend } from '../services/friendsService';
+import { getFriendsList, removeFriend, getPendingRequests, acceptFriendRequest, rejectFriendRequest } from '../services/friendsService';
 import RecommendationCard from '../components/RecommendationCard';
 import './Profile.css';
 
@@ -11,24 +11,48 @@ const Profile = ({ recs = [], onDelete, onEdit, likedRecIds = [], onToggleLike, 
     const navigate = useNavigate();
     const [friends, setFriends] = useState([]);
     const [loadingFriends, setLoadingFriends] = useState(true);
+    const [pendingRequests, setPendingRequests] = useState([]);
 
-    // Filter to show only the current user's recommendations
     const myRecs = recs.filter(r => r.userId === user?.uid);
 
     useEffect(() => {
-        const loadFriends = async () => {
+        const loadData = async () => {
             if (user) {
                 try {
-                    const friendsList = await getFriendsList(user.uid);
+                    const [friendsList, pending] = await Promise.all([
+                        getFriendsList(user.uid),
+                        getPendingRequests(user.uid),
+                    ]);
                     setFriends(friendsList);
+                    setPendingRequests(pending);
                 } catch (err) {
-                    console.error('Error loading friends:', err);
+                    console.error('Error loading profile data:', err);
                 }
             }
             setLoadingFriends(false);
         };
-        loadFriends();
+        loadData();
     }, [user]);
+
+    const handleAccept = async (requestId, fromUid) => {
+        try {
+            await acceptFriendRequest(requestId, fromUid, user.uid);
+            setPendingRequests(prev => prev.filter(r => r.id !== requestId));
+            const updatedFriends = await getFriendsList(user.uid);
+            setFriends(updatedFriends);
+        } catch (err) {
+            console.error('Error accepting request:', err);
+        }
+    };
+
+    const handleReject = async (requestId) => {
+        try {
+            await rejectFriendRequest(requestId);
+            setPendingRequests(prev => prev.filter(r => r.id !== requestId));
+        } catch (err) {
+            console.error('Error rejecting request:', err);
+        }
+    };
 
     const handleLogout = async () => {
         try {
@@ -130,6 +154,46 @@ const Profile = ({ recs = [], onDelete, onEdit, likedRecIds = [], onToggleLike, 
                     <p className="empty-state">No friends yet. Tap the connect button on someone's post to add them!</p>
                 )}
             </section>
+
+            {/* Pending Friend Requests */}
+            {pendingRequests.length > 0 && (
+                <section className="profile-section">
+                    <h2>Pending Requests ({pendingRequests.length})</h2>
+                    <div className="pending-list">
+                        {pendingRequests.map(req => (
+                            <div key={req.id} className="pending-item">
+                                <div className="pending-user">
+                                    {req.fromPhoto ? (
+                                        <img src={req.fromPhoto} alt={req.fromName} className="pending-avatar" />
+                                    ) : (
+                                        <div className="pending-avatar-fallback">{req.fromName?.[0] || '?'}</div>
+                                    )}
+                                    <div className="pending-info">
+                                        <span className="pending-name">{req.fromName}</span>
+                                        <span className="pending-email">{req.fromEmail}</span>
+                                    </div>
+                                </div>
+                                <div className="pending-actions">
+                                    <button
+                                        className="pending-accept"
+                                        title="Accept"
+                                        onClick={() => handleAccept(req.id, req.fromUid)}
+                                    >
+                                        <Check size={16} />
+                                    </button>
+                                    <button
+                                        className="pending-reject"
+                                        title="Decline"
+                                        onClick={() => handleReject(req.id)}
+                                    >
+                                        <XCircle size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             <section className="profile-section">
                 <h2>Settings</h2>

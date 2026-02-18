@@ -48,7 +48,7 @@
 .invite-btn {
     padding: 0 1.25rem;
     background-color: var(--accent);
-    color: black;
+    color: white;
     font-weight: 600;
     border-radius: 8px;
     font-size: 0.875rem;
@@ -131,7 +131,7 @@
     gap: 0.375rem;
     padding: 0.5rem 1rem;
     background: var(--accent);
-    color: black;
+    color: white;
     font-weight: 600;
     font-size: 0.8125rem;
     border-radius: 8px;
@@ -148,6 +148,30 @@
     color: #ef4444;
     font-size: 0.875rem;
     margin-top: 0.5rem;
+}
+
+.search-not-found {
+    margin-top: 0.75rem;
+}
+
+.invite-email-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: var(--accent);
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-radius: 8px;
+    transition: opacity 0.2s;
+    width: 100%;
+    justify-content: center;
+}
+
+.invite-email-btn:hover {
+    opacity: 0.9;
 }
 
 /* Requests List */
