@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Film, Music, BookOpen, Youtube, Podcast, Tv } from 'lucide-react';
 import './Login.css';
 
 const GoogleIcon = () => (
@@ -35,11 +36,29 @@ const Login = () => {
 
     return (
         <div className="login-page">
+            {/* Floating category icons in background */}
+            <div className="login-bg-icons">
+                <Film className="bg-icon icon-1" size={28} />
+                <Music className="bg-icon icon-2" size={24} />
+                <BookOpen className="bg-icon icon-3" size={26} />
+                <Youtube className="bg-icon icon-4" size={30} />
+                <Podcast className="bg-icon icon-5" size={22} />
+                <Tv className="bg-icon icon-6" size={26} />
+            </div>
+
             <div className="login-container">
+                <div className="login-badge">✨ Your taste, shared</div>
+
                 <h1 className="login-logo">wuzdat</h1>
-                <p className="login-tagline">
-                    Share and discover recommendations<br />
-                    from people you trust.
+
+                <p className="login-headline">
+                    A place to find<br />
+                    <span className="highlight">good recommendations</span><br />
+                    for everything.
+                </p>
+
+                <p className="login-subtitle">
+                    Movies, songs, books, shows, podcasts — discover what your friends love and share what you can't stop talking about.
                 </p>
 
                 <button
