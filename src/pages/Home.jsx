@@ -17,7 +17,7 @@ const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], onToggleL
             if (feedType === 'public') {
                 typeMatch = item.type === 'public' && !completedRecIds.includes(item.id);
             } else if (feedType === 'friends') {
-                typeMatch = item.type === 'friends' && !completedRecIds.includes(item.id);
+                typeMatch = (item.type === 'friends' || item.type === 'public') && !completedRecIds.includes(item.id);
             } else if (feedType === 'liked') {
                 typeMatch = likedRecIds.includes(item.id);
             } else if (feedType === 'completed') {
