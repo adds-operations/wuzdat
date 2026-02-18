@@ -55,7 +55,7 @@
 .visit-btn,
 .action-btn {
     background: var(--accent);
-    color: black;
+    color: white;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -185,9 +185,9 @@
 }
 
 .action-btn.tick.completed {
-    background: #ffcc00;
-    color: black;
-    border-color: #ffcc00;
+    background: #FF004D;
+    color: white;
+    border-color: #FF004D;
 }
 
 .action-btn.like {
@@ -254,7 +254,7 @@
 .edit-save-btn {
     padding: 0.5rem 1rem;
     background: var(--accent);
-    color: black;
+    color: white;
     font-weight: 600;
     font-size: 0.8125rem;
     border-radius: 6px;
