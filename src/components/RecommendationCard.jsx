@@ -52,7 +52,7 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
                     <div className="card-placeholder" />
                 )}
                 <div className="card-overlay">
-                    {/* Show Tick button for Public and Friends feed, but not for Owner */}
+                    {/* Show Tick and Like buttons only for other people's cards */}
                     {!isOwner && (
                         <button
                             className={`action-btn tick ${isCompleted ? 'completed' : ''}`}
@@ -67,17 +67,19 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
                         </button>
                     )}
 
-                    <button
-                        className={`action-btn like ${isLiked ? 'liked' : ''}`}
-                        title={isLiked ? "Unlike" : "Like"}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            onToggleLike && onToggleLike(item.id);
-                        }}
-                    >
-                        <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
-                    </button>
+                    {!isOwner && (
+                        <button
+                            className={`action-btn like ${isLiked ? 'liked' : ''}`}
+                            title={isLiked ? "Unlike" : "Like"}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                onToggleLike && onToggleLike(item.id);
+                            }}
+                        >
+                            <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
+                        </button>
+                    )}
 
                     {isOwner && (
                         <div className="owner-actions">
