@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ExternalLink, Play, Music, Film, Youtube, Globe, Trash2, Edit2, BookOpen, Book, Check, Heart, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { instantConnect } from '../services/friendsService';
+import { sendFriendRequest } from '../services/friendsService';
 import './RecommendationCard.css';
 
 const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggleLike, isCompleted, onToggleCompleted, feedType, currentUserId, friendIds = [], onFriendsChanged }) => {
@@ -32,11 +32,14 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
 
         setConnectStatus('sending');
         try {
-            await instantConnect(user.uid, item.author.id);
+            // Trigger the email notification if we can find the author's email (not available here usually, but the service handles the DB part)
+            // Ideally we'd pass the email if we had it. For now, just send the DB request.
+            await sendFriendRequest(user, item.author.id);
             setConnectStatus('sent');
-            if (onFriendsChanged) onFriendsChanged();
+            // Do NOT refresh friends immediately as it's just a request now
+            // if (onFriendsChanged) onFriendsChanged(); 
         } catch (err) {
-            if (err.message === 'Already friends') {
+            if (err.message === 'Already friends' || err.message === 'Friend request already exists') {
                 setConnectStatus('sent');
             } else {
                 setConnectStatus('error');
@@ -170,7 +173,7 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
                         {feedType === 'public' && !isOwnPost && !isAlreadyFriend && (
                             <button
                                 className={`action-btn connect ${connectStatus === 'sent' ? 'sent' : ''}`}
-                                title={connectStatus === 'sent' ? 'Connected' : 'Connect'}
+                                title={connectStatus === 'sent' ? 'Request Sent' : 'Connect'}
                                 onClick={handleConnect}
                                 disabled={connectStatus === 'sending' || connectStatus === 'sent'}
                             >
