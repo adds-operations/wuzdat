@@ -4,7 +4,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
-import { MOCK_RECS } from './data/mockData';
+
 import { db } from './firebaseClient';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import {
@@ -39,8 +39,6 @@ function AppContent() {
     useEffect(() => {
         const loadData = async () => {
             if (!db) {
-                // Fallback to mock data if Firebase is not configured
-                setRecs(MOCK_RECS);
                 setLoading(false);
                 return;
             }
@@ -64,7 +62,6 @@ function AppContent() {
                 setCompletedRecIds(completedIds);
             } catch (err) {
                 console.error('Error loading data:', err);
-                setRecs(MOCK_RECS);
             } finally {
                 setLoading(false);
             }
