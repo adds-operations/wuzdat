@@ -98,25 +98,27 @@ const Profile = ({ recs = [], onDelete, onEdit, likedRecIds = [], onToggleLike, 
             </section>
 
             <section className="profile-section">
-                <h2>Friends</h2>
-                <div className="friends-list">
-                    {loadingFriends ? (
-                        <p className="empty-state">Loading...</p>
-                    ) : friends.length > 0 ? (
-                        friends.map(friend => (
-                            <div key={friend.id} className="friend-item-real">
+                <h2>Friends ({friends.length})</h2>
+                {loadingFriends ? (
+                    <p className="empty-state">Loading...</p>
+                ) : friends.length > 0 ? (
+                    <div className="friends-grid">
+                        {friends.map(friend => (
+                            <div key={friend.id} className="friend-card">
                                 {friend.photoURL ? (
-                                    <img src={friend.photoURL} alt={friend.displayName} className="friend-avatar-img" />
+                                    <img src={friend.photoURL} alt={friend.displayName} className="friend-card-avatar" />
                                 ) : (
-                                    <div className="friend-avatar-fallback">{friend.displayName?.[0] || '?'}</div>
+                                    <div className="friend-card-avatar-fallback">
+                                        {friend.displayName?.[0] || '?'}
+                                    </div>
                                 )}
-                                <span className="friend-name">{friend.displayName}</span>
+                                <span className="friend-card-name">{friend.displayName}</span>
                             </div>
-                        ))
-                    ) : (
-                        <p className="empty-state">No friends yet. Use the + button to add friends!</p>
-                    )}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="empty-state">No friends yet. Tap the connect button on someone's post to add them!</p>
+                )}
             </section>
 
             <section className="profile-section">

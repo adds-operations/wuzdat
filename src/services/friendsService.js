@@ -113,6 +113,24 @@ export const rejectFriendRequest = async (requestId) => {
     await deleteDoc(doc(db, 'friendRequests', requestId));
 };
 
+// --- Instant Connect (no request needed) ---
+
+export const instantConnect = async (currentUid, targetUid) => {
+    if (!db) return;
+
+    // Check if already friends
+    const alreadyFriends = await checkFriendship(currentUid, targetUid);
+    if (alreadyFriends) {
+        throw new Error('Already friends');
+    }
+
+    // Create friendship directly — both users are friends instantly
+    await addDoc(collection(db, 'friends'), {
+        users: [currentUid, targetUid],
+        createdAt: serverTimestamp(),
+    });
+};
+
 // --- Friendships ---
 
 export const checkFriendship = async (uidA, uidB) => {
