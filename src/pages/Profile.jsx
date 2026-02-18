@@ -83,7 +83,7 @@ const Profile = ({ recs = [], onDelete, onEdit, likedRecIds = [], onToggleLike, 
                                 key={item.id}
                                 item={item}
                                 isOwner={true}
-                                onDelete={() => onDelete(item.id)}
+                                onDelete={onDelete}
                                 onEdit={onEdit}
                                 isLiked={likedRecIds.includes(item.id)}
                                 onToggleLike={onToggleLike}

@@ -6,7 +6,9 @@ import './RecommendationCard.css';
 
 const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggleLike, isCompleted, onToggleCompleted, feedType, currentUserId, friendIds = [], onFriendsChanged }) => {
     const { user } = useAuth();
-    const [connectStatus, setConnectStatus] = useState(null); // null | 'sending' | 'sent' | 'error'
+    const [connectStatus, setConnectStatus] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editTitle, setEditTitle] = useState(item.title);
 
     const getIcon = (cat) => {
         switch (cat.toLowerCase()) {
@@ -43,8 +45,23 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
         }
     };
 
+    const handleSaveEdit = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (editTitle.trim() && onEdit) {
+            onEdit(item.id, { title: editTitle.trim() });
+        }
+        setIsEditing(false);
+    };
+
+    const handleCardClick = () => {
+        if (!isEditing) {
+            window.open(item.link, '_blank');
+        }
+    };
+
     return (
-        <div className="card group" onClick={() => window.open(item.link, '_blank')}>
+        <div className="card group" onClick={handleCardClick}>
             <div className="card-image-container">
                 {item.image ? (
                     <img src={item.image} alt={item.title} className="card-image" loading="lazy" />
@@ -52,7 +69,6 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
                     <div className="card-placeholder" />
                 )}
                 <div className="card-overlay">
-                    {/* Show Tick and Like buttons only for other people's cards */}
                     {!isOwner && (
                         <button
                             className={`action-btn tick ${isCompleted ? 'completed' : ''}`}
@@ -88,7 +104,8 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
-                                    onEdit(item.id);
+                                    setEditTitle(item.title);
+                                    setIsEditing(true);
                                 }}
                                 title="Edit"
                             >
@@ -99,7 +116,7 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
-                                    onDelete();
+                                    if (onDelete) onDelete(item.id);
                                 }}
                                 title="Delete"
                             >
@@ -117,7 +134,26 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
                         {item.category}
                     </span>
                 </div>
-                <h3 className="card-title">{item.title}</h3>
+
+                {isEditing ? (
+                    <div className="edit-title-row" onClick={(e) => e.stopPropagation()}>
+                        <input
+                            type="text"
+                            className="edit-title-input"
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            autoFocus
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleSaveEdit(e);
+                                if (e.key === 'Escape') setIsEditing(false);
+                            }}
+                        />
+                        <button className="edit-save-btn" onClick={handleSaveEdit}>Save</button>
+                    </div>
+                ) : (
+                    <h3 className="card-title">{item.title}</h3>
+                )}
+
                 {item.description && <p className="card-desc">{item.description}</p>}
 
                 {item.author && (
@@ -131,11 +167,10 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
                             <span className="author-name">{item.author.name}</span>
                         </div>
 
-                        {/* Add Friend button only on Public page, not for own posts or existing friends */}
                         {feedType === 'public' && !isOwnPost && !isAlreadyFriend && (
                             <button
                                 className={`action-btn connect ${connectStatus === 'sent' ? 'sent' : ''}`}
-                                title={connectStatus === 'sent' ? 'Request Sent' : 'Connect'}
+                                title={connectStatus === 'sent' ? 'Connected' : 'Connect'}
                                 onClick={handleConnect}
                                 disabled={connectStatus === 'sending' || connectStatus === 'sent'}
                             >
