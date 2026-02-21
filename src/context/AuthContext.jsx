@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, signOut } from 'firebase/auth';
 import { auth, googleProvider } from '../firebaseClient';
 import { ensureUserProfile } from '../services/friendsService';
 
@@ -13,6 +13,12 @@ export const useAuth = () => {
     return context;
 };
 
+// Detect if the app is running inside an in-app browser (Instagram, TikTok, etc.)
+const isInAppBrowser = () => {
+    const ua = navigator.userAgent || navigator.vendor || '';
+    return /FBAN|FBAV|Instagram|Line|Twitter|Snapchat|TikTok|Musical|BytedanceWebview|MicroMessenger|WeChat/i.test(ua);
+};
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -22,6 +28,11 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
             return;
         }
+
+        // Handle redirect result (for in-app browser sign-in)
+        getRedirectResult(auth).catch((error) => {
+            console.error('Redirect sign-in error:', error);
+        });
 
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             setUser(firebaseUser);
@@ -41,10 +52,20 @@ export const AuthProvider = ({ children }) => {
             return;
         }
         try {
-            await signInWithPopup(auth, googleProvider);
+            if (isInAppBrowser()) {
+                // In-app browsers block popups — use redirect instead
+                await signInWithRedirect(auth, googleProvider);
+            } else {
+                await signInWithPopup(auth, googleProvider);
+            }
         } catch (error) {
             console.error('Google sign-in error:', error);
-            throw error;
+            // Fallback: if popup fails (e.g. blocked), try redirect
+            if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+                await signInWithRedirect(auth, googleProvider);
+            } else {
+                throw error;
+            }
         }
     };
 

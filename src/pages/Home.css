@@ -75,9 +75,31 @@
 
 .fab:hover {
     transform: scale(1.1);
-    background-color: #e6c200;
+    background-color: white;
+    color: black;
 }
 
 .fab:active {
     transform: scale(0.95);
+}
+
+@media (max-width: 640px) {
+    .main-content {
+        padding-top: 1rem;
+    }
+
+    .fab-container {
+        bottom: 1.25rem;
+        right: 1.25rem;
+    }
+
+    .fab {
+        width: 48px;
+        height: 48px;
+    }
+
+    .fab.secondary {
+        width: 40px;
+        height: 40px;
+    }
 }

@@ -150,13 +150,13 @@ export const getFriendIds = async (uid) => {
         where('users', 'array-contains', uid)
     );
     const snap = await getDocs(q);
-    const friendIds = [];
+    const friendIdSet = new Set();
     snap.docs.forEach(d => {
         const users = d.data().users;
         const friendId = users.find(u => u !== uid);
-        if (friendId) friendIds.push(friendId);
+        if (friendId) friendIdSet.add(friendId);
     });
-    return friendIds;
+    return [...friendIdSet];
 };
 
 export const getFriendsList = async (uid) => {

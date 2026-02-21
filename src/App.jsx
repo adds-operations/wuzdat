@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
+import Toast from './components/Toast';
 
 import { db } from './firebaseClient';
 import { getFriendIds } from './services/friendsService';
@@ -33,6 +34,8 @@ function AppContent() {
     const [recs, setRecs] = useState([]);
     const [likedRecIds, setLikedRecIds] = useState([]);
     const [completedRecIds, setCompletedRecIds] = useState([]);
+    const [toastMessage, setToastMessage] = useState('');
+    const [isToastVisible, setIsToastVisible] = useState(false);
     const [friendIds, setFriendIds] = useState([]);
     const [isFocusMode, setIsFocusMode] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -109,6 +112,8 @@ function AppContent() {
                     ...rec,
                     created_at: new Date().toISOString()
                 }, ...prev]);
+                setToastMessage('Thanks for sharing! 🎉');
+                setIsToastVisible(true);
             } catch (err) {
                 console.error('Error adding rec:', err);
             }
@@ -216,6 +221,11 @@ function AppContent() {
         return (
             <>
                 <Navbar isFocusMode={isFocusMode} onToggleFocus={() => setIsFocusMode(!isFocusMode)} />
+                <Toast
+                    message={toastMessage}
+                    isVisible={isToastVisible}
+                    onClose={() => setIsToastVisible(false)}
+                />
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -233,6 +243,11 @@ function AppContent() {
     return (
         <div className="app">
             <Navbar isFocusMode={isFocusMode} onToggleFocus={() => setIsFocusMode(!isFocusMode)} />
+            <Toast
+                message={toastMessage}
+                isVisible={isToastVisible}
+                onClose={() => setIsToastVisible(false)}
+            />
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/" element={

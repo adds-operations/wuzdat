@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "wuzdat-cef7d"
+  },
+  "targets": {
+    "wuzdat-cef7d": {
+      "hosting": {
+        "main": [
+          "wuzdat"
+        ]
+      }
+    }
+  }
+}

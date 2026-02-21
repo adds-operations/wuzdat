@@ -288,3 +288,55 @@
 .settings-item.danger:hover {
     background-color: #fee2e2;
 }
+
+@media (max-width: 640px) {
+    .profile-page {
+        padding-top: 1.25rem;
+        padding-bottom: 1.25rem;
+    }
+
+    .profile-header {
+        margin-bottom: 2rem;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .profile-info h1 {
+        font-size: 1.25rem;
+    }
+
+    .profile-section {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .profile-section h2 {
+        font-size: 1rem;
+    }
+
+    .friend-card-avatar,
+    .friend-card-avatar-fallback {
+        width: 48px;
+        height: 48px;
+    }
+
+    .friend-card-name {
+        max-width: 60px;
+        font-size: 0.7rem;
+    }
+
+    .pending-item {
+        padding: 0.5rem;
+    }
+
+    .pending-name {
+        font-size: 0.8125rem;
+    }
+
+    .pending-email {
+        font-size: 0.75rem;
+    }
+}

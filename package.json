@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "./firebase_bin deploy"
   },
   "dependencies": {
     "firebase": "^9.23.0",

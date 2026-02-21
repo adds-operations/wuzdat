@@ -72,11 +72,12 @@
 }
 
 .action-btn.delete {
-    color: #ef4444;
+    color: white;
 }
 
 .action-btn.delete:hover {
-    background-color: #fee2e2;
+    color: var(--accent, #FF004D);
+    background-color: rgba(255, 0, 77, 0.15);
 }
 
 .owner-actions {
@@ -264,4 +265,44 @@
 
 .edit-save-btn:hover {
     opacity: 0.9;
+}
+
+/* Mobile: always show overlay actions (no hover on touch) */
+@media (max-width: 640px) {
+    .card:hover {
+        transform: none;
+    }
+
+    .card-overlay {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.35);
+    }
+
+    .card-content {
+        padding: 0.75rem;
+    }
+
+    .card-title {
+        font-size: 0.9375rem;
+    }
+
+    .card-desc {
+        font-size: 0.8125rem;
+    }
+
+    .card-author {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+    }
+
+    .owner-actions {
+        top: 6px;
+        right: 6px;
+    }
+
+    .visit-btn,
+    .action-btn {
+        width: 36px;
+        height: 36px;
+    }
 }

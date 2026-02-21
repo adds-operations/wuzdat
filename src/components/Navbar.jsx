@@ -10,7 +10,10 @@ const Navbar = ({ isFocusMode, onToggleFocus }) => {
     return (
         <nav className="navbar">
             <div className="container navbar-content">
-                <NavLink to="/" className="logo">wuzdat</NavLink>
+                <NavLink to="/" className="logo">
+                    <img src="/images/logo.png" alt="wuzdat logo" className="logo-icon" />
+                    wuzdat
+                </NavLink>
 
                 <div className="nav-links">
                     <NavLink
