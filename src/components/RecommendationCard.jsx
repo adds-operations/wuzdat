@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { sendFriendRequest } from '../services/friendsService';
 import './RecommendationCard.css';
 
-const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggleLike, isCompleted, onToggleCompleted, feedType, currentUserId, friendIds = [], onFriendsChanged }) => {
+const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, likeCount = 0, onToggleLike, isCompleted, onToggleCompleted, feedType, currentUserId, friendIds = [], onFriendsChanged }) => {
     const { user } = useAuth();
     const [connectStatus, setConnectStatus] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -179,6 +179,13 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, onToggle
                             >
                                 {connectStatus === 'sent' ? <Check size={16} /> : <UserPlus size={16} />}
                             </button>
+                        )}
+
+                        {feedType === 'public' && likeCount > 0 && (
+                            <span className="like-count-badge">
+                                <Heart size={12} fill="currentColor" />
+                                {likeCount}
+                            </span>
                         )}
                     </div>
                 )}

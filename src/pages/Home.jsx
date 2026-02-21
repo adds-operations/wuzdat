@@ -7,7 +7,7 @@ import AddModal from '../components/AddModal';
 import AddFriendModal from '../components/AddFriendModal';
 import './Home.css';
 
-const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], onToggleLike, completedRecIds = [], onToggleCompleted, isFocusMode = false, friendIds = [], onFriendsChanged }) => {
+const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], likeCounts = {}, onToggleLike, completedRecIds = [], onToggleCompleted, isFocusMode = false, friendIds = [], onFriendsChanged }) => {
     const { user } = useAuth();
     const [activeFilter, setActiveFilter] = useState('All');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,6 +46,7 @@ const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], onToggleL
                             key={item.id}
                             item={item}
                             isLiked={likedRecIds.includes(item.id)}
+                            likeCount={likeCounts[item.id] || 0}
                             onToggleLike={onToggleLike}
                             isCompleted={completedRecIds.includes(item.id)}
                             onToggleCompleted={onToggleCompleted}

@@ -17,6 +17,7 @@ import {
     updateDoc,
     doc,
     query,
+    where,
     orderBy,
     serverTimestamp
 } from 'firebase/firestore';
@@ -33,6 +34,7 @@ function AppContent() {
     const { user } = useAuth();
     const [recs, setRecs] = useState([]);
     const [likedRecIds, setLikedRecIds] = useState([]);
+    const [likeCounts, setLikeCounts] = useState({});
     const [completedRecIds, setCompletedRecIds] = useState([]);
     const [toastMessage, setToastMessage] = useState('');
     const [isToastVisible, setIsToastVisible] = useState(false);
@@ -54,9 +56,18 @@ function AppContent() {
                 const recsSnap = await getDocs(recsQuery);
                 const recsData = recsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-                // Fetch likes
+                // Fetch all likes (for counts) + filter user's own likes
                 const likesSnap = await getDocs(collection(db, 'likes'));
-                const likedIds = likesSnap.docs.map(d => d.data().rec_id);
+                const likedIds = [];
+                const counts = {};
+                likesSnap.docs.forEach(d => {
+                    const data = d.data();
+                    const recId = data.rec_id;
+                    counts[recId] = (counts[recId] || 0) + 1;
+                    if (data.user_id === user?.uid) {
+                        likedIds.push(recId);
+                    }
+                });
 
                 // Fetch completed
                 const completedSnap = await getDocs(collection(db, 'completed'));
@@ -67,6 +78,7 @@ function AppContent() {
 
                 setRecs(recsData);
                 setLikedRecIds(likedIds);
+                setLikeCounts(counts);
                 setCompletedRecIds(completedIds);
                 setFriendIds(fIds);
             } catch (err) {
@@ -128,11 +140,10 @@ function AppContent() {
             try {
                 await deleteDoc(doc(db, 'recommendations', id));
                 // Also clean up any likes/completed for this rec
-                const likesSnap = await getDocs(collection(db, 'likes'));
+                const likesQ = query(collection(db, 'likes'), where('rec_id', '==', id));
+                const likesSnap = await getDocs(likesQ);
                 for (const likeDoc of likesSnap.docs) {
-                    if (likeDoc.data().rec_id === id) {
-                        await deleteDoc(doc(db, 'likes', likeDoc.id));
-                    }
+                    await deleteDoc(doc(db, 'likes', likeDoc.id));
                 }
                 const completedSnap = await getDocs(collection(db, 'completed'));
                 for (const compDoc of completedSnap.docs) {
@@ -147,6 +158,7 @@ function AppContent() {
         }
         setRecs(prev => prev.filter(r => r.id !== id));
         setLikedRecIds(prev => prev.filter(lid => lid !== id));
+        setLikeCounts(prev => { const next = { ...prev }; delete next[id]; return next; });
         setCompletedRecIds(prev => prev.filter(cid => cid !== id));
     }, []);
 
@@ -165,19 +177,25 @@ function AppContent() {
     const toggleLike = useCallback(async (id) => {
         const isLiked = likedRecIds.includes(id);
 
-        if (db) {
+        if (db && user) {
             try {
                 if (isLiked) {
-                    // Find and delete the like doc
-                    const likesSnap = await getDocs(collection(db, 'likes'));
+                    // Find and delete only THIS user's like
+                    const q = query(
+                        collection(db, 'likes'),
+                        where('rec_id', '==', id),
+                        where('user_id', '==', user.uid)
+                    );
+                    const likesSnap = await getDocs(q);
                     for (const likeDoc of likesSnap.docs) {
-                        if (likeDoc.data().rec_id === id) {
-                            await deleteDoc(doc(db, 'likes', likeDoc.id));
-                            break;
-                        }
+                        await deleteDoc(doc(db, 'likes', likeDoc.id));
                     }
                 } else {
-                    await addDoc(collection(db, 'likes'), { rec_id: id, created_at: serverTimestamp() });
+                    await addDoc(collection(db, 'likes'), {
+                        rec_id: id,
+                        user_id: user.uid,
+                        created_at: serverTimestamp()
+                    });
                 }
             } catch (err) {
                 console.error('Error toggling like:', err);
@@ -188,7 +206,11 @@ function AppContent() {
         setLikedRecIds(prev =>
             isLiked ? prev.filter(lid => lid !== id) : [...prev, id]
         );
-    }, [likedRecIds]);
+        setLikeCounts(prev => ({
+            ...prev,
+            [id]: (prev[id] || 0) + (isLiked ? -1 : 1)
+        }));
+    }, [likedRecIds, user]);
 
     const toggleCompleted = useCallback(async (id) => {
         const isCompleted = completedRecIds.includes(id);
@@ -257,6 +279,7 @@ function AppContent() {
                             recs={recs}
                             onAddRec={handleAddRec}
                             likedRecIds={likedRecIds}
+                            likeCounts={likeCounts}
                             onToggleLike={toggleLike}
                             completedRecIds={completedRecIds}
                             onToggleCompleted={toggleCompleted}
@@ -273,6 +296,7 @@ function AppContent() {
                             recs={recs}
                             onAddRec={handleAddRec}
                             likedRecIds={likedRecIds}
+                            likeCounts={likeCounts}
                             onToggleLike={toggleLike}
                             completedRecIds={completedRecIds}
                             onToggleCompleted={toggleCompleted}
@@ -289,6 +313,7 @@ function AppContent() {
                             recs={recs}
                             onAddRec={handleAddRec}
                             likedRecIds={likedRecIds}
+                            likeCounts={likeCounts}
                             onToggleLike={toggleLike}
                             completedRecIds={completedRecIds}
                             onToggleCompleted={toggleCompleted}
@@ -305,6 +330,7 @@ function AppContent() {
                             recs={recs}
                             onAddRec={handleAddRec}
                             likedRecIds={likedRecIds}
+                            likeCounts={likeCounts}
                             onToggleLike={toggleLike}
                             completedRecIds={completedRecIds}
                             onToggleCompleted={toggleCompleted}
@@ -321,6 +347,7 @@ function AppContent() {
                             onDelete={handleDeleteRec}
                             onEdit={handleEditRec}
                             likedRecIds={likedRecIds}
+                            likeCounts={likeCounts}
                             onToggleLike={toggleLike}
                             completedRecIds={completedRecIds}
                             onToggleCompleted={toggleCompleted}

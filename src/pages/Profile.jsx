@@ -6,7 +6,7 @@ import { getFriendsList, removeFriend, getPendingRequests, acceptFriendRequest, 
 import RecommendationCard from '../components/RecommendationCard';
 import './Profile.css';
 
-const Profile = ({ recs = [], onDelete, onEdit, likedRecIds = [], onToggleLike, completedRecIds = [], onToggleCompleted }) => {
+const Profile = ({ recs = [], onDelete, onEdit, likedRecIds = [], likeCounts = {}, onToggleLike, completedRecIds = [], onToggleCompleted }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [friends, setFriends] = useState([]);
@@ -110,6 +110,7 @@ const Profile = ({ recs = [], onDelete, onEdit, likedRecIds = [], onToggleLike, 
                                 onDelete={onDelete}
                                 onEdit={onEdit}
                                 isLiked={likedRecIds.includes(item.id)}
+                                likeCount={likeCounts[item.id] || 0}
                                 onToggleLike={onToggleLike}
                                 isCompleted={completedRecIds.includes(item.id)}
                                 onToggleCompleted={onToggleCompleted}
