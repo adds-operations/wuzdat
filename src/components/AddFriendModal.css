@@ -286,3 +286,81 @@
     font-weight: 500;
     font-size: 0.9375rem;
 }
+
+/* Email / Phone Toggle */
+.invite-toggle {
+    display: flex;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 0.75rem;
+    gap: 3px;
+}
+
+.toggle-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: transparent;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+}
+
+.toggle-tab.active {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-tab:not(.active):hover {
+    color: var(--text-primary);
+    background: var(--border);
+}
+
+/* Phone Invite */
+.phone-invite-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.whatsapp-invite-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 1.25rem;
+    background: #25D366;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-radius: 8px;
+    transition: opacity 0.2s, transform 0.1s;
+    cursor: pointer;
+    border: none;
+}
+
+.whatsapp-invite-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.whatsapp-invite-btn:active {
+    transform: translateY(0);
+}
+
+.whatsapp-invite-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}

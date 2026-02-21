@@ -115,3 +115,5 @@ dist
 
 # Mac
 .DS_Store
+firebase_bin
+.firebase/
