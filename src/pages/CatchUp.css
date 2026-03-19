@@ -1,0 +1,477 @@
+/* ─── Catch Up Page ─── */
+
+.catchup-page {
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 6rem;
+    background: #000;
+}
+
+/* ─── Flowy Animated Gradients ─── */
+.catchup-flowy-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    /* Create multiple blurred blobs of color */
+    background: 
+        radial-gradient(circle at 0% 0%, rgba(255, 0, 77, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(138, 43, 226, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 100% 0%, rgba(255, 120, 0, 0.25) 0%, transparent 50%),
+        radial-gradient(circle at 0% 100%, rgba(255, 0, 77, 0.3) 0%, transparent 50%);
+    filter: blur(40px);
+    opacity: 0.8;
+    animation: flowBG 20s ease-in-out infinite alternate;
+}
+
+@keyframes flowBG {
+    0% {
+        transform: scale(1) translate(0, 0) rotate(0deg);
+    }
+    33% {
+        transform: scale(1.1) translate(-2%, 3%) rotate(2deg);
+    }
+    66% {
+        transform: scale(1.05) translate(3%, -2%) rotate(-1deg);
+    }
+    100% {
+        transform: scale(1.15) translate(1%, 2%) rotate(1deg);
+    }
+}
+
+/* ─── Dither Dot Pattern Overlay ─── */
+.catchup-dither {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    /* Dither halftone dot grid */
+    background-image:
+        radial-gradient(circle 1.2px, rgba(255, 0, 77, 0.25) 1px, transparent 1px),
+        radial-gradient(circle 0.8px, rgba(255, 255, 255, 0.08) 0.8px, transparent 0.8px);
+    background-size: 5px 5px, 8px 8px;
+    background-position: 0 0, 2.5px 2.5px;
+    mix-blend-mode: screen;
+}
+
+/* ─── Grain Texture ─── */
+.catchup-grain {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    animation: grainShift 8s steps(4) infinite;
+}
+
+@keyframes grainShift {
+    0% { background-position: 0 0; }
+    25% { background-position: -100px -50px; }
+    50% { background-position: 50px -100px; }
+    75% { background-position: -50px 100px; }
+    100% { background-position: 0 0; }
+}
+
+/* ─── Sparkle Particles ─── */
+.catchup-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.sparkle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    animation: sparkleFloat var(--duration) var(--delay) ease-in-out infinite;
+}
+
+.sparkle:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+@keyframes sparkleFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(0) scale(0);
+    }
+    20% {
+        opacity: 0.7;
+        transform: translateY(-20px) scale(1);
+    }
+    80% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-120px) scale(0.5);
+    }
+}
+
+/* ─── Header ─── */
+.catchup-header {
+    text-align: center;
+    padding: 3rem 1rem 1rem;
+    position: relative;
+    z-index: 2;
+    animation: fadeSlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.catchup-greeting {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+}
+
+.catchup-tagline {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Card count ─── */
+.catchup-count {
+    text-align: center;
+    padding: 0.5rem 0 1rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+
+.catchup-count span {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* ─── Card Deck ─── */
+.catchup-deck-container {
+    position: relative;
+    z-index: 2;
+    max-width: 380px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    height: 520px;
+}
+
+.catchup-deck {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* ─── Poster Card ─── */
+.poster-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--bg-surface);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.poster-card:active {
+    cursor: grabbing;
+}
+
+.poster-card.dragging {
+    transition: none;
+    cursor: grabbing;
+}
+
+.poster-card.swiped-left {
+    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+                opacity 0.45s ease;
+    transform: translateX(-150%) rotate(-20deg) !important;
+    opacity: 0 !important;
+}
+
+.poster-card.swiped-right {
+    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+                opacity 0.45s ease;
+    transform: translateX(150%) rotate(20deg) !important;
+    opacity: 0 !important;
+}
+
+/* Poster image */
+.poster-image-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: #1a1a1a;
+}
+
+.poster-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.poster-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
+}
+
+/* Gradient overlay at bottom of image */
+.poster-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 55%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
+    pointer-events: none;
+}
+
+/* Title overlay */
+.poster-title-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.25rem 1.25rem 1.5rem;
+    z-index: 2;
+}
+
+.poster-category {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+.poster-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #fff;
+    letter-spacing: -0.01em;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.poster-author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 0.75rem;
+    opacity: 0.7;
+}
+
+.poster-author-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.poster-author-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Tap hint */
+.poster-tap-hint {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    letter-spacing: 0.03em;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.poster-card:hover .poster-tap-hint {
+    opacity: 1;
+}
+
+/* Swipe instruction */
+.catchup-swipe-instruction {
+    text-align: center;
+    padding-top: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0.5;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    animation: fadeInSlow 1s 1s ease-out both;
+}
+
+@keyframes fadeInSlow {
+    from { opacity: 0; }
+    to { opacity: 0.5; }
+}
+
+/* ─── Empty State ─── */
+.catchup-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.catchup-empty-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    display: block;
+    animation: gentleBounce 2s ease-in-out infinite;
+}
+
+@keyframes gentleBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.catchup-empty h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+.catchup-empty p {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* ─── Bottom Toggle ─── */
+.catchup-toggle-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0 1.5rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 60%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.catchup-toggle {
+    display: flex;
+    gap: 0;
+    background: rgba(18, 18, 18, 0.85);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    padding: 4px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.catchup-toggle-btn {
+    padding: 0.625rem 1.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    letter-spacing: 0.01em;
+}
+
+.catchup-toggle-btn:hover {
+    color: var(--text-primary);
+}
+
+.catchup-toggle-btn.active {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 2px 12px rgba(255, 0, 77, 0.4);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+    .catchup-header {
+        padding: 2rem 1rem 0.75rem;
+    }
+
+    .catchup-greeting {
+        font-size: 1.5rem;
+    }
+
+    .catchup-tagline {
+        font-size: 0.875rem;
+    }
+
+    .catchup-deck-container {
+        height: 460px;
+        max-width: 100%;
+    }
+
+    .poster-title {
+        font-size: 1.125rem;
+    }
+
+    .poster-tap-hint {
+        opacity: 0.7;
+    }
+
+    .catchup-toggle-btn {
+        padding: 0.5rem 1.25rem;
+        font-size: 0.8125rem;
+    }
+}

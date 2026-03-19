@@ -1,0 +1,23 @@
+{
+    "name": "wuzdat",
+    "short_name": "wuzdat",
+    "description": "Share and discover recommendations with friends",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#FF004D",
+    "icons": [
+        {
+            "src": "/images/app-icon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/images/app-icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

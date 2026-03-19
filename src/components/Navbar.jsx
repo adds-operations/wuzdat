@@ -2,9 +2,10 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { User, Heart, Maximize2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import NotificationPanel from './NotificationPanel';
 import './Navbar.css';
 
-const Navbar = ({ isFocusMode, onToggleFocus }) => {
+const Navbar = ({ isFocusMode, onToggleFocus, notifications, unreadCount, onMarkAllRead, onClearAll }) => {
     const { user } = useAuth();
 
     return (
@@ -18,6 +19,13 @@ const Navbar = ({ isFocusMode, onToggleFocus }) => {
                 <div className="nav-links">
                     <NavLink
                         to="/"
+                        end
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        Catch Up
+                    </NavLink>
+                    <NavLink
+                        to="/public"
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                     >
                         Public
@@ -45,6 +53,12 @@ const Navbar = ({ isFocusMode, onToggleFocus }) => {
                     >
                         <Maximize2 size={24} />
                     </button>
+                    <NotificationPanel
+                        notifications={notifications}
+                        unreadCount={unreadCount}
+                        onMarkAllRead={onMarkAllRead}
+                        onClearAll={onClearAll}
+                    />
                     <NavLink to="/liked" className="icon-btn" aria-label="Liked">
                         <Heart size={24} />
                     </NavLink>

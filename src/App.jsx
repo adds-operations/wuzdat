@@ -2,12 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import CatchUp from './pages/CatchUp';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Toast from './components/Toast';
+import ShareCard from './components/ShareCard';
+import Onboarding from './components/Onboarding';
 
 import { db } from './firebaseClient';
-import { getFriendIds } from './services/friendsService';
+import { getFriendIds, getFriendsList } from './services/friendsService';
+import { getNotifications, markAllRead, createNotification, clearAllNotifications } from './services/notificationService';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import {
     collection,
@@ -38,8 +42,15 @@ function AppContent() {
     const [completedRecIds, setCompletedRecIds] = useState([]);
     const [toastMessage, setToastMessage] = useState('');
     const [isToastVisible, setIsToastVisible] = useState(false);
+    const [shareItem, setShareItem] = useState(null);
     const [friendIds, setFriendIds] = useState([]);
+    const [friendsList, setFriendsList] = useState([]);
     const [isFocusMode, setIsFocusMode] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [showOnboarding, setShowOnboarding] = useState(() => {
+        return user && !localStorage.getItem('wuzdat_onboarded');
+    });
     const [loading, setLoading] = useState(true);
 
     // Load data from Firestore on mount
@@ -69,18 +80,28 @@ function AppContent() {
                     }
                 });
 
-                // Fetch completed
-                const completedSnap = await getDocs(collection(db, 'completed'));
+                // Fetch completed (user-specific)
+                const completedQuery = user
+                    ? query(collection(db, 'completed'), where('user_id', '==', user.uid))
+                    : collection(db, 'completed');
+                const completedSnap = await getDocs(completedQuery);
                 const completedIds = completedSnap.docs.map(d => d.data().rec_id);
 
-                // Fetch friend IDs
+                // Fetch friend IDs and friends list
                 const fIds = user ? await getFriendIds(user.uid) : [];
+                const fList = user ? await getFriendsList(user.uid) : [];
+
+                // Fetch notifications
+                const notifs = user ? await getNotifications(user.uid) : [];
 
                 setRecs(recsData);
                 setLikedRecIds(likedIds);
                 setLikeCounts(counts);
                 setCompletedRecIds(completedIds);
                 setFriendIds(fIds);
+                setFriendsList(fList);
+                setNotifications(notifs);
+                setUnreadCount(notifs.filter(n => !n.read).length);
             } catch (err) {
                 console.error('Error loading data:', err);
             } finally {
@@ -95,6 +116,32 @@ function AppContent() {
         if (user) {
             const fIds = await getFriendIds(user.uid);
             setFriendIds(fIds);
+            const fList = await getFriendsList(user.uid);
+            setFriendsList(fList);
+        }
+    }, [user]);
+
+    const refreshNotifications = useCallback(async () => {
+        if (user) {
+            const notifs = await getNotifications(user.uid);
+            setNotifications(notifs);
+            setUnreadCount(notifs.filter(n => !n.read).length);
+        }
+    }, [user]);
+
+    const handleMarkAllRead = useCallback(async () => {
+        if (user) {
+            await markAllRead(user.uid);
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            setUnreadCount(0);
+        }
+    }, [user]);
+
+    const handleClearAll = useCallback(async () => {
+        if (user) {
+            await clearAllNotifications(user.uid);
+            setNotifications([]);
+            setUnreadCount(0);
         }
     }, [user]);
 
@@ -106,6 +153,7 @@ function AppContent() {
             link: newRec.link,
             description: newRec.description || '',
             type: newRec.isPublic ? 'public' : 'friends',
+            taggedFriendIds: newRec.isPublic ? [] : (newRec.taggedFriendIds || []),
             created_at: serverTimestamp(),
             // Attach the authenticated user's info
             userId: user?.uid || 'anonymous',
@@ -124,8 +172,12 @@ function AppContent() {
                     ...rec,
                     created_at: new Date().toISOString()
                 }, ...prev]);
-                setToastMessage('Thanks for sharing! 🎉');
-                setIsToastVisible(true);
+                // Show the shareable card overlay
+                setShareItem({
+                    ...rec,
+                    id: docRef.id,
+                    created_at: new Date().toISOString()
+                });
             } catch (err) {
                 console.error('Error adding rec:', err);
             }
@@ -196,6 +248,11 @@ function AppContent() {
                         user_id: user.uid,
                         created_at: serverTimestamp()
                     });
+                    // Notify the rec owner
+                    const rec = recs.find(r => r.id === id);
+                    if (rec && rec.userId && rec.userId !== user.uid) {
+                        createNotification(rec.userId, 'like', user, rec.title);
+                    }
                 }
             } catch (err) {
                 console.error('Error toggling like:', err);
@@ -218,15 +275,22 @@ function AppContent() {
         if (db) {
             try {
                 if (isCompleted) {
-                    const compSnap = await getDocs(collection(db, 'completed'));
+                    const compQ = query(
+                        collection(db, 'completed'),
+                        where('rec_id', '==', id),
+                        where('user_id', '==', user?.uid)
+                    );
+                    const compSnap = await getDocs(compQ);
                     for (const compDoc of compSnap.docs) {
-                        if (compDoc.data().rec_id === id) {
-                            await deleteDoc(doc(db, 'completed', compDoc.id));
-                            break;
-                        }
+                        await deleteDoc(doc(db, 'completed', compDoc.id));
                     }
                 } else {
-                    await addDoc(collection(db, 'completed'), { rec_id: id, created_at: serverTimestamp() });
+                    await addDoc(collection(db, 'completed'), { rec_id: id, user_id: user?.uid, created_at: serverTimestamp() });
+                    // Notify the rec owner (only for friends-only cards)
+                    const rec = recs.find(r => r.id === id);
+                    if (rec && rec.type === 'friends' && rec.userId && rec.userId !== user?.uid) {
+                        createNotification(rec.userId, 'completed', user, rec.title);
+                    }
                 }
             } catch (err) {
                 console.error('Error toggling completed:', err);
@@ -242,7 +306,7 @@ function AppContent() {
     if (loading) {
         return (
             <>
-                <Navbar isFocusMode={isFocusMode} onToggleFocus={() => setIsFocusMode(!isFocusMode)} />
+                <Navbar isFocusMode={isFocusMode} onToggleFocus={() => setIsFocusMode(!isFocusMode)} notifications={notifications} unreadCount={unreadCount} onMarkAllRead={handleMarkAllRead} onClearAll={handleClearAll} />
                 <Toast
                     message={toastMessage}
                     isVisible={isToastVisible}
@@ -264,20 +328,42 @@ function AppContent() {
 
     return (
         <div className="app">
-            <Navbar isFocusMode={isFocusMode} onToggleFocus={() => setIsFocusMode(!isFocusMode)} />
+            <Navbar isFocusMode={isFocusMode} onToggleFocus={() => setIsFocusMode(!isFocusMode)} notifications={notifications} unreadCount={unreadCount} onMarkAllRead={handleMarkAllRead} onClearAll={handleClearAll} />
             <Toast
                 message={toastMessage}
                 isVisible={isToastVisible}
                 onClose={() => setIsToastVisible(false)}
             />
+            <ShareCard
+                item={shareItem}
+                user={user}
+                isVisible={!!shareItem}
+                onClose={() => setShareItem(null)}
+            />
+            {showOnboarding && (
+                <Onboarding
+                    user={user}
+                    onComplete={() => setShowOnboarding(false)}
+                />
+            )}
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/" element={
+                    <ProtectedRoute>
+                        <CatchUp
+                            recs={recs}
+                            friendIds={friendIds}
+                        />
+                    </ProtectedRoute>
+                } />
+                <Route path="/public" element={
                     <ProtectedRoute>
                         <Home
                             feedType="public"
                             recs={recs}
                             onAddRec={handleAddRec}
+                            onDelete={handleDeleteRec}
+                            onEdit={handleEditRec}
                             likedRecIds={likedRecIds}
                             likeCounts={likeCounts}
                             onToggleLike={toggleLike}
@@ -285,6 +371,7 @@ function AppContent() {
                             onToggleCompleted={toggleCompleted}
                             isFocusMode={isFocusMode}
                             friendIds={friendIds}
+                            friendsList={friendsList}
                             onFriendsChanged={refreshFriends}
                         />
                     </ProtectedRoute>
@@ -295,6 +382,8 @@ function AppContent() {
                             feedType="friends"
                             recs={recs}
                             onAddRec={handleAddRec}
+                            onDelete={handleDeleteRec}
+                            onEdit={handleEditRec}
                             likedRecIds={likedRecIds}
                             likeCounts={likeCounts}
                             onToggleLike={toggleLike}
@@ -302,6 +391,7 @@ function AppContent() {
                             onToggleCompleted={toggleCompleted}
                             isFocusMode={isFocusMode}
                             friendIds={friendIds}
+                            friendsList={friendsList}
                             onFriendsChanged={refreshFriends}
                         />
                     </ProtectedRoute>
@@ -312,6 +402,8 @@ function AppContent() {
                             feedType="completed"
                             recs={recs}
                             onAddRec={handleAddRec}
+                            onDelete={handleDeleteRec}
+                            onEdit={handleEditRec}
                             likedRecIds={likedRecIds}
                             likeCounts={likeCounts}
                             onToggleLike={toggleLike}
@@ -319,6 +411,7 @@ function AppContent() {
                             onToggleCompleted={toggleCompleted}
                             isFocusMode={isFocusMode}
                             friendIds={friendIds}
+                            friendsList={friendsList}
                             onFriendsChanged={refreshFriends}
                         />
                     </ProtectedRoute>
@@ -329,6 +422,8 @@ function AppContent() {
                             feedType="liked"
                             recs={recs}
                             onAddRec={handleAddRec}
+                            onDelete={handleDeleteRec}
+                            onEdit={handleEditRec}
                             likedRecIds={likedRecIds}
                             likeCounts={likeCounts}
                             onToggleLike={toggleLike}
@@ -336,6 +431,7 @@ function AppContent() {
                             onToggleCompleted={toggleCompleted}
                             isFocusMode={isFocusMode}
                             friendIds={friendIds}
+                            friendsList={friendsList}
                             onFriendsChanged={refreshFriends}
                         />
                     </ProtectedRoute>
@@ -351,6 +447,7 @@ function AppContent() {
                             onToggleLike={toggleLike}
                             completedRecIds={completedRecIds}
                             onToggleCompleted={toggleCompleted}
+                            friendsList={friendsList}
                         />
                     </ProtectedRoute>
                 } />

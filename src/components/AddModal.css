@@ -223,3 +223,102 @@ input:checked+.slider:before {
 .submit-btn:hover {
     opacity: 0.9;
 }
+
+/* Tag Friends Section */
+.tag-friends-section {
+    margin-bottom: 1.25rem;
+    padding: 0.75rem;
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.tag-friends-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.625rem;
+}
+
+.tag-optional {
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.friend-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.friend-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.friend-chip:hover {
+    border-color: var(--text-secondary);
+    background: var(--bg-primary);
+}
+
+.friend-chip.tagged {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb, 255, 193, 7), 0.12);
+    color: var(--text-primary);
+}
+
+.chip-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.chip-avatar-fallback {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.chip-name {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chip-remove {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.tag-hint {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}

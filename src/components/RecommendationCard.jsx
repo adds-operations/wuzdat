@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { ExternalLink, Play, Music, Film, Youtube, Globe, Trash2, Edit2, BookOpen, Book, Check, Heart, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { sendFriendRequest } from '../services/friendsService';
+import EditModal from './EditModal';
 import './RecommendationCard.css';
 
-const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, likeCount = 0, onToggleLike, isCompleted, onToggleCompleted, feedType, currentUserId, friendIds = [], onFriendsChanged }) => {
+const RecommendationCard = ({ item, isOwner: isOwnerProp, onDelete, onEdit, isLiked, likeCount = 0, onToggleLike, isCompleted, onToggleCompleted, feedType, currentUserId, friendIds = [], friendsList = [], onFriendsChanged }) => {
     const { user } = useAuth();
     const [connectStatus, setConnectStatus] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editTitle, setEditTitle] = useState(item.title);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    // Derive ownership: explicit prop OR match logged-in user
+    const isOwner = isOwnerProp !== undefined ? isOwnerProp : (item.userId === user?.uid);
 
     const getIcon = (cat) => {
         switch (cat.toLowerCase()) {
@@ -32,12 +35,8 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, likeCoun
 
         setConnectStatus('sending');
         try {
-            // Trigger the email notification if we can find the author's email (not available here usually, but the service handles the DB part)
-            // Ideally we'd pass the email if we had it. For now, just send the DB request.
             await sendFriendRequest(user, item.author.id);
             setConnectStatus('sent');
-            // Do NOT refresh friends immediately as it's just a request now
-            // if (onFriendsChanged) onFriendsChanged(); 
         } catch (err) {
             if (err.message === 'Already friends' || err.message === 'Friend request already exists') {
                 setConnectStatus('sent');
@@ -48,149 +47,142 @@ const RecommendationCard = ({ item, isOwner, onDelete, onEdit, isLiked, likeCoun
         }
     };
 
-    const handleSaveEdit = (e) => {
+    const handleDelete = (e) => {
         e.stopPropagation();
         e.preventDefault();
-        if (editTitle.trim() && onEdit) {
-            onEdit(item.id, { title: editTitle.trim() });
+        if (window.confirm('Delete this recommendation? This cannot be undone.')) {
+            if (onDelete) onDelete(item.id);
         }
-        setIsEditing(false);
+    };
+
+    const handleEditClick = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        setIsEditModalOpen(true);
+    };
+
+    const handleEditSave = (id, updatedFields) => {
+        if (onEdit) onEdit(id, updatedFields);
     };
 
     const handleCardClick = () => {
-        if (!isEditing) {
+        if (!isEditModalOpen) {
             window.open(item.link, '_blank');
         }
     };
 
     return (
-        <div className="card group" onClick={handleCardClick}>
-            <div className="card-image-container">
-                {item.image ? (
-                    <img src={item.image} alt={item.title} className="card-image" loading="lazy" />
-                ) : (
-                    <div className="card-placeholder" />
-                )}
-                <div className="card-overlay">
-                    {!isOwner && (
-                        <button
-                            className={`action-btn tick ${isCompleted ? 'completed' : ''}`}
-                            title={isCompleted ? "Marked as Watched" : "Mark as Watched"}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                onToggleCompleted && onToggleCompleted(item.id);
-                            }}
-                        >
-                            <Check size={16} />
-                        </button>
+        <>
+            <div className="card group" onClick={handleCardClick}>
+                <div className="card-image-container">
+                    {item.image ? (
+                        <img src={item.image} alt={item.title} className="card-image" loading="lazy" />
+                    ) : (
+                        <div className="card-placeholder" />
                     )}
-
-                    {!isOwner && (
-                        <button
-                            className={`action-btn like ${isLiked ? 'liked' : ''}`}
-                            title={isLiked ? "Unlike" : "Like"}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                onToggleLike && onToggleLike(item.id);
-                            }}
-                        >
-                            <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
-                        </button>
-                    )}
-
-                    {isOwner && (
-                        <div className="owner-actions">
+                    <div className="card-overlay">
+                        {!isOwner && (
                             <button
-                                className="action-btn edit"
+                                className={`action-btn tick ${isCompleted ? 'completed' : ''}`}
+                                title={isCompleted ? "Marked as Watched" : "Mark as Watched"}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
-                                    setEditTitle(item.title);
-                                    setIsEditing(true);
+                                    onToggleCompleted && onToggleCompleted(item.id);
                                 }}
-                                title="Edit"
                             >
-                                <Edit2 size={16} />
+                                <Check size={16} />
                             </button>
+                        )}
+
+                        {!isOwner && (
                             <button
-                                className="action-btn delete"
+                                className={`action-btn like ${isLiked ? 'liked' : ''}`}
+                                title={isLiked ? "Unlike" : "Like"}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
-                                    if (onDelete) onDelete(item.id);
+                                    onToggleLike && onToggleLike(item.id);
                                 }}
-                                title="Delete"
                             >
-                                <Trash2 size={16} />
+                                <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
                             </button>
-                        </div>
-                    )}
-                </div>
-            </div>
+                        )}
 
-            <div className="card-content">
-                <div className="card-header">
-                    <span className="card-tag">
-                        {getIcon(item.category)}
-                        {item.category}
-                    </span>
-                </div>
-
-                {isEditing ? (
-                    <div className="edit-title-row" onClick={(e) => e.stopPropagation()}>
-                        <input
-                            type="text"
-                            className="edit-title-input"
-                            value={editTitle}
-                            onChange={(e) => setEditTitle(e.target.value)}
-                            autoFocus
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleSaveEdit(e);
-                                if (e.key === 'Escape') setIsEditing(false);
-                            }}
-                        />
-                        <button className="edit-save-btn" onClick={handleSaveEdit}>Save</button>
+                        {isOwner && (
+                            <div className="owner-actions">
+                                <button
+                                    className="action-btn edit"
+                                    onClick={handleEditClick}
+                                    title="Edit"
+                                >
+                                    <Edit2 size={16} />
+                                </button>
+                                <button
+                                    className="action-btn delete"
+                                    onClick={handleDelete}
+                                    title="Delete"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
+                        )}
                     </div>
-                ) : (
+                </div>
+
+                <div className="card-content">
+                    <div className="card-header">
+                        <span className="card-tag">
+                            {getIcon(item.category)}
+                            {item.category}
+                        </span>
+                    </div>
+
                     <h3 className="card-title">{item.title}</h3>
-                )}
 
-                {item.description && <p className="card-desc">{item.description}</p>}
+                    {item.description && <p className="card-desc">{item.description}</p>}
 
-                {item.author && (
-                    <div className="card-author">
-                        <div className="author-info">
-                            {item.author.avatar ? (
-                                <img src={item.author.avatar} alt={item.author.name} className="author-avatar" />
-                            ) : (
-                                <div className="author-avatar-fallback">{item.author.name?.[0] || '?'}</div>
+                    {item.author && (
+                        <div className="card-author">
+                            <div className="author-info">
+                                {item.author.avatar ? (
+                                    <img src={item.author.avatar} alt={item.author.name} className="author-avatar" />
+                                ) : (
+                                    <div className="author-avatar-fallback">{item.author.name?.[0] || '?'}</div>
+                                )}
+                                <span className="author-name">{item.author.name}</span>
+                            </div>
+
+                            {feedType === 'public' && !isOwnPost && !isAlreadyFriend && (
+                                <button
+                                    className={`action-btn connect ${connectStatus === 'sent' ? 'sent' : ''}`}
+                                    title={connectStatus === 'sent' ? 'Request Sent' : 'Connect'}
+                                    onClick={handleConnect}
+                                    disabled={connectStatus === 'sending' || connectStatus === 'sent'}
+                                >
+                                    {connectStatus === 'sent' ? <Check size={16} /> : <UserPlus size={16} />}
+                                </button>
                             )}
-                            <span className="author-name">{item.author.name}</span>
+
+                            {feedType === 'public' && likeCount > 0 && (
+                                <span className="like-count-badge">
+                                    <Heart size={12} fill="currentColor" />
+                                    {likeCount}
+                                </span>
+                            )}
                         </div>
-
-                        {feedType === 'public' && !isOwnPost && !isAlreadyFriend && (
-                            <button
-                                className={`action-btn connect ${connectStatus === 'sent' ? 'sent' : ''}`}
-                                title={connectStatus === 'sent' ? 'Request Sent' : 'Connect'}
-                                onClick={handleConnect}
-                                disabled={connectStatus === 'sending' || connectStatus === 'sent'}
-                            >
-                                {connectStatus === 'sent' ? <Check size={16} /> : <UserPlus size={16} />}
-                            </button>
-                        )}
-
-                        {feedType === 'public' && likeCount > 0 && (
-                            <span className="like-count-badge">
-                                <Heart size={12} fill="currentColor" />
-                                {likeCount}
-                            </span>
-                        )}
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
-        </div>
+
+            <EditModal
+                isOpen={isEditModalOpen}
+                item={item}
+                onClose={() => setIsEditModalOpen(false)}
+                onSave={handleEditSave}
+                friendsList={friendsList}
+            />
+        </>
     );
 };
 

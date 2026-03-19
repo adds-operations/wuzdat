@@ -1,0 +1,327 @@
+/* ── Share Card Overlay ── */
+.share-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: shareOverlayIn 0.3s ease-out;
+    padding: 1.5rem;
+    gap: 1.5rem;
+}
+
+@keyframes shareOverlayIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ── The Shareable Card (story-sized) ── */
+.share-card {
+    width: 320px;
+    border-radius: 24px;
+    overflow: hidden;
+    background: linear-gradient(165deg, #1a0a10 0%, #2a0a15 40%, #3d0a1a 100%);
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 0 80px rgba(255, 0, 77, 0.08);
+    animation: shareCardPop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+
+@keyframes shareCardPop {
+    0% {
+        transform: scale(0.8) translateY(30px);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.02) translateY(-2px);
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Accent glow bar at top */
+.share-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #FF004D, #ff6b9d, #FF004D);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease infinite;
+}
+
+@keyframes shimmer {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* ── Card Image Area ── */
+.share-card-image-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+}
+
+.share-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.share-card-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #2a1520, #1a0a10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-card-image-placeholder svg {
+    color: rgba(255, 255, 255, 0.15);
+}
+
+/* Category pill floating on image */
+.share-card-category {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: white;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ── Card Body ── */
+.share-card-body {
+    padding: 20px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.share-card-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #ffffff;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.share-card-desc {
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Divider */
+.share-card-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 2px 0;
+}
+
+/* User row */
+.share-card-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.share-card-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+}
+
+.share-card-avatar-fallback {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF004D, #ff6b9d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: white;
+}
+
+.share-card-user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.share-card-username {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.share-card-shared-label {
+    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* Branding footer */
+.share-card-branding {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2px;
+}
+
+.share-card-logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.share-card-logo-img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.share-card-logo span span {
+    color: #FF004D;
+}
+
+.share-card-link-hint {
+    font-size: 0.625rem;
+    color: rgba(255, 255, 255, 0.2);
+    font-weight: 500;
+}
+
+/* ── Action Buttons ── */
+.share-actions {
+    display: flex;
+    gap: 12px;
+    width: 320px;
+}
+
+.share-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 0;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.share-action-btn.download {
+    background: var(--accent, #FF004D);
+    color: white;
+    border: none;
+}
+
+.share-action-btn.download:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+}
+
+.share-action-btn.close {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.share-action-btn.close:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+}
+
+/* ── Confetti / Celebration ── */
+.share-confetti {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    animation: confettiDrop 1.5s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes confettiDrop {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px) scale(1.2);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(40px) scale(0.8);
+    }
+}
+
+/* ── Mobile adjustments ── */
+@media (max-width: 400px) {
+    .share-card {
+        width: 280px;
+    }
+
+    .share-actions {
+        width: 280px;
+    }
+
+    .share-card-title {
+        font-size: 1rem;
+    }
+}

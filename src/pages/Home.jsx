@@ -7,7 +7,7 @@ import AddModal from '../components/AddModal';
 import AddFriendModal from '../components/AddFriendModal';
 import './Home.css';
 
-const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], likeCounts = {}, onToggleLike, completedRecIds = [], onToggleCompleted, isFocusMode = false, friendIds = [], onFriendsChanged }) => {
+const Home = ({ feedType = 'public', recs, onAddRec, onDelete, onEdit, likedRecIds = [], likeCounts = {}, onToggleLike, completedRecIds = [], onToggleCompleted, isFocusMode = false, friendIds = [], friendsList = [], onFriendsChanged }) => {
     const { user } = useAuth();
     const [activeFilter, setActiveFilter] = useState('All');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,7 +22,14 @@ const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], likeCount
                 // Show posts from friends (both public and friends-only) + own posts
                 const isFriend = friendIds.includes(item.userId);
                 const isOwn = item.userId === user?.uid;
-                typeMatch = (isFriend || isOwn || item.type === 'public') && !completedRecIds.includes(item.id);
+                if (!(isFriend || isOwn)) { typeMatch = false; }
+                else if (completedRecIds.includes(item.id)) { typeMatch = false; }
+                // If the rec has tagged friends, only show to tagged users (or the author)
+                else if (item.taggedFriendIds && item.taggedFriendIds.length > 0 && !isOwn) {
+                    typeMatch = item.taggedFriendIds.includes(user?.uid);
+                } else {
+                    typeMatch = true;
+                }
             } else if (feedType === 'liked') {
                 typeMatch = likedRecIds.includes(item.id);
             } else if (feedType === 'completed') {
@@ -45,6 +52,8 @@ const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], likeCount
                         <RecommendationCard
                             key={item.id}
                             item={item}
+                            onDelete={onDelete}
+                            onEdit={onEdit}
                             isLiked={likedRecIds.includes(item.id)}
                             likeCount={likeCounts[item.id] || 0}
                             onToggleLike={onToggleLike}
@@ -53,6 +62,7 @@ const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], likeCount
                             feedType={feedType}
                             currentUserId={user?.uid}
                             friendIds={friendIds}
+                            friendsList={friendsList}
                             onFriendsChanged={onFriendsChanged}
                         />
                     ))}
@@ -72,6 +82,7 @@ const Home = ({ feedType = 'public', recs, onAddRec, likedRecIds = [], likeCount
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onAdd={onAddRec}
+                friendsList={friendsList}
             />
 
             <AddFriendModal

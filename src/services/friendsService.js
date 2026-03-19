@@ -11,6 +11,7 @@ import {
     where,
     serverTimestamp
 } from 'firebase/firestore';
+import { createNotification } from './notificationService';
 
 // --- User Profiles ---
 
@@ -75,6 +76,9 @@ export const sendFriendRequest = async (fromUser, toUid) => {
         toUid: toUid,
         createdAt: serverTimestamp(),
     });
+
+    // Notify the target user
+    createNotification(toUid, 'friend_added', fromUser);
 };
 
 export const getPendingRequests = async (uid) => {
@@ -106,6 +110,17 @@ export const acceptFriendRequest = async (requestId, fromUid, toUid) => {
     });
     // Delete the request
     await deleteDoc(doc(db, 'friendRequests', requestId));
+
+    // Notify the requester that their request was accepted
+    const toUserSnap = await getDoc(doc(db, 'users', toUid));
+    if (toUserSnap.exists()) {
+        const toUser = toUserSnap.data();
+        createNotification(fromUid, 'friend_added', {
+            uid: toUid,
+            displayName: toUser.displayName || '',
+            photoURL: toUser.photoURL || '',
+        });
+    }
 };
 
 export const rejectFriendRequest = async (requestId) => {

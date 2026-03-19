@@ -187,7 +187,7 @@ const AddFriendModal = ({ isOpen, onClose, onFriendsChanged }) => {
                             <div className="invite-row">
                                 <input
                                     type="tel"
-                                    placeholder="+91 98765 43210"
+                                    placeholder="+91 12345 67890"
                                     className="invite-input"
                                     value={phoneNumber}
                                     onChange={(e) => setPhoneNumber(e.target.value)}
